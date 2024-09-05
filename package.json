@@ -1,0 +1,17 @@
+{
+  "name": "blxr-routing-bun-js",
+  "description": "Bun.js-based application, receives block streams via gRPC from bloXroute and relays them to a Geth node on Binance Smart Chain (BSC).",
+  "author": "piyanggoon",
+  "version": "0.0.1",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "app": "bun ./src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
