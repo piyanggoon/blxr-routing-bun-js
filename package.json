@@ -6,12 +6,19 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "app": "bun ./src/index.ts"
+    "app": "bun ./src/index.ts",
+    "format": "bunx biome format --write ./src"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/snappyjs": "^0.7.1",
+    "ethereum-cryptography": "^2.2.1",
+    "snappyjs": "^0.7.0"
   }
 }
