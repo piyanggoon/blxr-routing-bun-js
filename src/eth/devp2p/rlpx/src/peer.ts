@@ -1,5 +1,5 @@
 import * as snappy from 'snappyjs'
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 import { bytesToUtf8, equalsBytes, hexToBytes, utf8ToBytes } from 'ethereum-cryptography/utils'
 import { ECIES } from './ecies'
 import { bytesToInt, concatBytes, intToBytes } from '~/eth/utils'
@@ -59,7 +59,7 @@ export class Peer {
 	protected _socketData: Uint8Array
 	protected _remoteId: Uint8Array | null
 	protected _remoteName: string | null
-	protected _capabilities?: Capabilities[]
+	protected _capabilities: Capabilities[]
 	protected _EIP8: Uint8Array | boolean
 	protected _eciesSession: ECIES
 
@@ -251,7 +251,7 @@ export class Peer {
 
 		const shared: { [name: string]: Capabilities } = {}
 		for (const item of this._hello.capabilities) {
-			for (const c of this._capabilities!) {
+			for (const c of this._capabilities) {
 				if (c.name !== item.name || c.version !== item.version) continue
 				if (shared[c.name] !== undefined && shared[c.name].version > c.version) continue
 				shared[c.name] = c

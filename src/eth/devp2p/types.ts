@@ -1,5 +1,4 @@
 import type { Socket } from 'bun'
-
 import type { Peer } from './rlpx'
 import type { Protocol } from './protocol'
 
@@ -47,7 +46,7 @@ export interface PeerOptions {
 	clientId: Uint8Array
 	remoteId: Uint8Array | null
 	privateKey: Uint8Array
-	capabilities?: Capabilities[]
+	capabilities: Capabilities[]
 	EIP8?: Uint8Array | boolean
 }
 

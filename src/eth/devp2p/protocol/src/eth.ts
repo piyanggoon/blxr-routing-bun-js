@@ -1,5 +1,7 @@
-import { RLP, type Input } from '~/eth/rlp'
+import { RLP } from '~/eth/rlp'
 import { Protocol } from './protocol'
+
+import type { Input } from '~/eth/rlp'
 
 export class ETH extends Protocol {
 	protected _status: ETH.StatusMsg | null = null

@@ -1,5 +1,5 @@
 import { platform, arch } from 'os'
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 import { Peer } from './peer'
 import { pk2id } from '~/eth/devp2p/utils'
 import { secp256k1 } from 'ethereum-cryptography/secp256k1'
