@@ -119,6 +119,10 @@ export class Peer {
 		return DISCONNECT_REASON[code]
 	}
 
+	_isSnappy() {
+		return (this._hello !== null && this._hello.protocolVersion >= 5)
+	}
+
 	_sendAck() {
 		if (this._closed) return
 		if (this._eciesSession['_gotEIP8Auth']) {
@@ -193,7 +197,7 @@ export class Peer {
 			let payload: any = body.subarray(1)
 			let compressed = false
 			const origPayload = payload
-			if (this._hello !== null && this._hello.protocolVersion >= 5) {
+			if (this._isSnappy()) {
 				payload = snappy.uncompress(payload)
 				compressed = true
 			}
@@ -349,7 +353,7 @@ export class Peer {
 
 	_sendPing() {
 		let data = RLP.encode([])
-		if (this._hello !== null && this._hello.protocolVersion >= 5) {
+		if (this._isSnappy()) {
 			data = snappy.compress(data)
 		}
 		if (this._sendMessage(PREFIXES.PING, data) !== true) return
@@ -362,7 +366,7 @@ export class Peer {
 
 	_sendPong() {
 		let data = RLP.encode([])
-		if (this._hello !== null && this._hello.protocolVersion >= 5) {
+		if (this._isSnappy()) {
 			data = snappy.compress(data)
 		}
 		this._sendMessage(PREFIXES.PONG, data)

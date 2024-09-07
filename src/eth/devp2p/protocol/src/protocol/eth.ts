@@ -28,7 +28,7 @@ export class ETH extends Protocol {
 				}
 				this.sendMessage(ETH.MESSAGE_CODES.STATUS, payload)
 				const version = bytesToInt(payload[0] as Uint8Array)
-				if (version >= 67) {
+				if (version >= 66) {
 					this.sendMessage(ETH.MESSAGE_CODES.UPGRADE_STATUS, [[1]])
 				}
 				break
@@ -50,7 +50,7 @@ export class ETH extends Protocol {
 
 	sendMessage(code: ETH.MESSAGE_CODES, payload: Input) {
 		payload = RLP.encode(payload)
-		if (this._peer['_hello'] !== null && this._peer['_hello'].protocolVersion >= 5) {
+		if (this._peer._isSnappy()) {
 			payload = snappy.compress(payload)
 		}
 		this._send(code, payload)
@@ -82,7 +82,7 @@ export namespace ETH {
 		GET_POOLED_TRANSACTIONS = 0x09,
 		POOLED_TRANSACTIONS = 0x0a,
 
-		// eth67 (bsc)
+		// eth66 (BSC)
 		UPGRADE_STATUS = 0x0b
 	}
 }
