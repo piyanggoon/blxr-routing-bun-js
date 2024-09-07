@@ -69,3 +69,26 @@ export const concatBytes = (...arrays: Uint8Array[]): Uint8Array => {
 	}
 	return result
 }
+
+export function hexViewer(byteArray: Uint8Array) {
+	let result = ''
+	const bytesPerRow = 16
+	const rows = Math.ceil(byteArray.length / bytesPerRow)
+	for (let row = 0; row < rows; row++) {
+		let hexSection = ''
+		let asciiSection = ''
+		const rowOffset = row * bytesPerRow
+		for (let i = 0; i < bytesPerRow; i++) {
+			const index = rowOffset + i
+			if (index < byteArray.length) {
+				const byte = byteArray[index]
+				hexSection += byte.toString(16).padStart(2, '0').toUpperCase() + ' '
+				asciiSection += byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : '.'
+			} else {
+				hexSection += '   '
+			}
+		}
+		result += rowOffset.toString(16).padStart(8, '0').toUpperCase() + '  ' + hexSection + ' ' + asciiSection + '\n'
+	}
+	return result
+}
