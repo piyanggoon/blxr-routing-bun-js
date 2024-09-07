@@ -61,7 +61,7 @@ export function decode(input: Input, stream = false): Uint8Array | NestedUint8Ar
 	if (stream) {
 		return {
 			data: decoded.data,
-			remainder: decoded.remainder.slice(),
+			remainder: decoded.remainder.slice()
 		}
 	}
 	if (decoded.remainder.length !== 0) {
@@ -78,7 +78,7 @@ function _decode(input: Uint8Array): Decoded {
 	if (firstByte <= 0x7f) {
 		return {
 			data: input.slice(0, 1),
-			remainder: input.subarray(1),
+			remainder: input.subarray(1)
 		}
 	} else if (firstByte <= 0xb7) {
 		length = firstByte - 0x7f
@@ -95,7 +95,7 @@ function _decode(input: Uint8Array): Decoded {
 
 		return {
 			data,
-			remainder: input.subarray(length),
+			remainder: input.subarray(length)
 		}
 	} else if (firstByte <= 0xbf) {
 		lLength = firstByte - 0xb6
@@ -110,7 +110,7 @@ function _decode(input: Uint8Array): Decoded {
 
 		return {
 			data,
-			remainder: input.subarray(length + lLength),
+			remainder: input.subarray(length + lLength)
 		}
 	} else if (firstByte <= 0xf7) {
 		length = firstByte - 0xbf
@@ -123,7 +123,7 @@ function _decode(input: Uint8Array): Decoded {
 
 		return {
 			data: decoded,
-			remainder: input.subarray(length),
+			remainder: input.subarray(length)
 		}
 	} else {
 		lLength = firstByte - 0xf6
@@ -146,7 +146,7 @@ function _decode(input: Uint8Array): Decoded {
 
 		return {
 			data: decoded,
-			remainder: input.subarray(totalLength),
+			remainder: input.subarray(totalLength)
 		}
 	}
 }
@@ -228,13 +228,6 @@ function toBytes(v: Input): Uint8Array {
 		return Uint8Array.from([])
 	}
 	throw new Error('toBytes: received unsupported type ' + typeof v)
-}
-
-export const utils = {
-	bytesToHex,
-	concatBytes,
-	hexToBytes,
-	utf8ToBytes,
 }
 
 export const RLP = { encode, decode }

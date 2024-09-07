@@ -24,11 +24,11 @@ export enum DISCONNECT_REASON {
 	UNEXPECTED_IDENTITY = 0x09,
 	SAME_IDENTITY = 0x0a,
 	TIMEOUT = 0x0b,
-	SUBPROTOCOL_ERROR = 0x10,
+	SUBPROTOCOL_ERROR = 0x10
 }
 
 export enum ProtocolType {
-	ETH = 'eth',
+	ETH = 'eth'
 }
 
 export interface Capabilities {
@@ -53,9 +53,7 @@ export interface PeerOptions {
 export interface RLPxOptions {
 	listenHost: string
 	listenPort: number
-	// clientId?: Uint8Array
 	capabilities: Capabilities[]
-	// timeout?: number
 }
 
 export type SendMethod = (code: number, data: Uint8Array) => any

@@ -14,7 +14,7 @@ enum PREFIXES {
 	HELLO = 0x00,
 	DISCONNECT = 0x01,
 	PING = 0x02,
-	PONG = 0x03,
+	PONG = 0x03
 }
 
 type HelloMsg = {
@@ -42,7 +42,7 @@ interface Hello {
 
 const BASE_PROTOCOL_VERSION = 5
 const BASE_PROTOCOL_LENGTH = 16
-const PING_INTERVAL = 15000 // 15 sec * 1000
+const PING_INTERVAL = 15000 // 15 sec
 
 export class Peer {
 	public events: EventEmitter
@@ -103,26 +103,20 @@ export class Peer {
 
 		this._protocols = []
 
-		this.events.on('socket:data', (data) => {
-			this._onSocketData(data)
-		})
-		this.events.on('socket:close', () => {
-			this._onSocketClose()
-		})
+		this.events.on('socket:data', this._onSocketData.bind(this))
+		this.events.on('socket:close', this._onSocketClose.bind(this))
 	}
 
 	getId() {
-		if (this._remoteId !== null) {
-			return this._remoteId
-		}
-		return null
+		return this._remoteId
 	}
 
 	getName() {
-		if (this._remoteName !== null) {
-			return this._remoteName
-		}
-		return null
+		return this._remoteName
+	}
+
+	getDisconnectPrefix(code: DISCONNECT_REASON): string {
+		return DISCONNECT_REASON[code]
 	}
 
 	_sendAck() {
@@ -167,9 +161,7 @@ export class Peer {
 		const parseData = this._socketData.subarray(0, bytesCount)
 
 		const size = this._eciesSession.parseHeader(parseData)
-		if (size === undefined) {
-			return
-		}
+		if (size === undefined) return
 
 		this._state = 'Body'
 		this._nextPacketSize = size + 16
@@ -236,10 +228,10 @@ export class Peer {
 			capabilities: payload[2].map((item: any) => {
 				return {
 					name: bytesToUtf8(item[0]),
-					version: bytesToInt(item[1]),
+					version: bytesToInt(item[1])
 				}
 			}),
-			port: bytesToInt(payload[3]),
+			port: bytesToInt(payload[3])
 		}
 
 		if (this._remoteId === null) {
@@ -276,7 +268,7 @@ export class Peer {
 				return {
 					protocol,
 					offset: _offset,
-					length: obj.length,
+					length: obj.length
 				}
 			})
 
@@ -346,15 +338,12 @@ export class Peer {
 			this.clientId,
 			this._capabilities?.map((c) => [utf8ToBytes(c.name), intToBytes(c.version)]) || [],
 			this._port === null ? new Uint8Array(0) : intToBytes(this._port),
-			this.id,
+			this.id
 		]
 		if (!this._closed) {
 			if (this._sendMessage(PREFIXES.HELLO, RLP.encode(payload as never as Uint8Array[])) === true) {
 				this._weHello = payload
 			}
-			// if (this._hello) {
-			//     this.events.emit('connect')
-			// }
 		}
 	}
 
@@ -383,7 +372,7 @@ export class Peer {
 		if (code < BASE_PROTOCOL_LENGTH)
 			return {
 				protocol: this as unknown as Protocol,
-				offset: 0,
+				offset: 0
 			}
 		for (const obj of this._protocols) {
 			if (code >= obj.offset && code < obj.offset + obj.length!) return obj
@@ -407,8 +396,8 @@ export class Peer {
 						break
 				}
 			}
-		} catch (err) {
-			console.log('_onSocketData', err)
+		} catch {
+			// empty
 		}
 	}
 

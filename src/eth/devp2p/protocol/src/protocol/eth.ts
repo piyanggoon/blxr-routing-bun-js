@@ -1,5 +1,5 @@
 import { RLP } from '~/eth/rlp'
-import { Protocol } from './protocol'
+import { Protocol } from '../protocol'
 
 import type { Input } from '~/eth/rlp'
 
@@ -11,7 +11,7 @@ export class ETH extends Protocol {
 		name: 'eth',
 		version: 68,
 		length: 17,
-		constructor: ETH,
+		constructor: ETH
 	}
 
 	getMsgPrefix(msgCode: ETH.MESSAGE_CODES): string {
@@ -59,6 +59,6 @@ export namespace ETH {
 		// eth65
 		NEW_POOLED_TRANSACTION_HASHES = 0x08,
 		GET_POOLED_TRANSACTIONS = 0x09,
-		POOLED_TRANSACTIONS = 0x0a,
+		POOLED_TRANSACTIONS = 0x0a
 	}
 }

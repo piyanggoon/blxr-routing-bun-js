@@ -28,14 +28,14 @@ export class ECIES {
 	protected _egressMac: MAC | null = null
 	protected _ephemeralPrivateKey: Uint8Array
 	protected _ephemeralPublicKey: Uint8Array
-	protected _remoteEphemeralPublicKey: Uint8Array | null = null // we don't need store this key, but why don't?
+	protected _remoteEphemeralPublicKey: Uint8Array | null = null
 	protected _ephemeralSharedSecret: Uint8Array | null = null
 	protected _bodySize: number | null = null
 
 	protected _keccakFunction: (msg: Uint8Array) => Uint8Array
 	protected _ecdsaSign: (
 		msg: Uint8Array,
-		pk: Uint8Array,
+		pk: Uint8Array
 	) => {
 		signature: Uint8Array
 		recid: number
@@ -61,16 +61,14 @@ export class ECIES {
 		if (!this._remotePublicKey) return
 		const x = ecdhX(this._remotePublicKey, privateKey)
 		const key = concatKDF(x, 32)
-		const ekey = key.subarray(0, 16) // encryption key
-		const mKey = crypto.createHash('sha256').update(key.subarray(16, 32)).digest() // MAC key
+		const ekey = key.subarray(0, 16)
+		const mKey = crypto.createHash('sha256').update(key.subarray(16, 32)).digest()
 
-		// encrypt
 		const IV = getRandomBytesSync(16)
 		const cipher = crypto.createCipheriv('aes-128-ctr', ekey, IV)
 		const encryptedData = Uint8Array.from(cipher.update(data))
 		const dataIV = concatBytes(IV, encryptedData)
 
-		// create tag
 		if (!sharedMacData) {
 			sharedMacData = Uint8Array.from([])
 		}
@@ -87,20 +85,17 @@ export class ECIES {
 		const dataIV = data.subarray(65, -32)
 		const tag = data.subarray(-32)
 
-		// derive keys
 		const x = ecdhX(publicKey, this._privateKey)
 		const key = concatKDF(x, 32)
-		const ekey = key.subarray(0, 16) // encryption key
-		const mKey = Uint8Array.from(crypto.createHash('sha256').update(key.subarray(16, 32)).digest()) // MAC key
+		const ekey = key.subarray(0, 16)
+		const mKey = Uint8Array.from(crypto.createHash('sha256').update(key.subarray(16, 32)).digest())
 
-		// check the tag
 		if (!sharedMacData) {
 			sharedMacData = Uint8Array.from([])
 		}
 		const _tag = crypto.createHmac('sha256', mKey).update(concatBytes(dataIV, sharedMacData)).digest()
 		assertEq(_tag, tag, 'should have valid tag')
 
-		// decrypt data
 		const IV = dataIV.subarray(0, 16)
 		const encryptedData = dataIV.subarray(16)
 		const decipher = crypto.createDecipheriv('aes-128-ctr', ekey, IV)
@@ -137,14 +132,13 @@ export class ECIES {
 		const sig = this._ecdsaSign(xor(x, this._nonce), this._ephemeralPrivateKey)
 		const data = [
 			concatBytes(sig.signature, Uint8Array.from([sig.recid])),
-			// this._keccakFunction(pk2id(this._ephemeralPublicKey)),
 			pk2id(this._publicKey),
 			this._nonce,
-			Uint8Array.from([0x04]),
+			Uint8Array.from([0x04])
 		]
 
 		const dataRLP = RLP.encode(data)
-		const pad = getRandomBytesSync(100 + Math.floor(Math.random() * 151)) // Random padding between 100, 250
+		const pad = getRandomBytesSync(100 + Math.floor(Math.random() * 151))
 		const authMsg = concatBytes(dataRLP, pad)
 		const overheadLength = 113
 		const sharedMacData = intToBytes(authMsg.length + overheadLength)
@@ -164,7 +158,7 @@ export class ECIES {
 			this._keccakFunction(pk2id(this._ephemeralPublicKey)),
 			pk2id(this._publicKey),
 			this._nonce,
-			Uint8Array.from([0x00]),
+			Uint8Array.from([0x00])
 		)
 
 		this._initMsg = this._encryptMessage(data)
@@ -187,7 +181,7 @@ export class ECIES {
 
 			signature = decrypted.subarray(0, 64)
 			recoveryId = decrypted[64]
-			heId = decrypted.subarray(65, 97) // 32 bytes
+			heId = decrypted.subarray(65, 97)
 			remotePublicKey = id2pk(decrypted.subarray(97, 161))
 			nonce = decrypted.subarray(161, 193)
 		} else {
@@ -199,9 +193,8 @@ export class ECIES {
 			nonce = decoded[2]
 		}
 
-		// parse packet
-		this._remotePublicKey = remotePublicKey // 64 bytes
-		this._remoteNonce = nonce // 32 bytes
+		this._remotePublicKey = remotePublicKey
+		this._remoteNonce = nonce
 
 		const x = ecdhX(this._remotePublicKey, this._privateKey)
 
@@ -216,7 +209,7 @@ export class ECIES {
 			assertEq(
 				this._keccakFunction(pk2id(this._remoteEphemeralPublicKey)),
 				heId,
-				'the hash of the ephemeral key should match',
+				'the hash of the ephemeral key should match'
 			)
 		}
 	}
@@ -230,7 +223,7 @@ export class ECIES {
 	createAckEIP8(): Uint8Array | undefined {
 		const data = [pk2id(this._ephemeralPublicKey), this._nonce, Uint8Array.from([0x04])]
 		const dataRLP = RLP.encode(data)
-		const pad = getRandomBytesSync(100 + Math.floor(Math.random() * 151)) // Random padding between 100, 250
+		const pad = getRandomBytesSync(100 + Math.floor(Math.random() * 151))
 		const ackMsg = concatBytes(dataRLP, pad)
 		const overheadLength = 113
 		const sharedMacData = intToBytes(ackMsg.length + overheadLength)
@@ -270,7 +263,6 @@ export class ECIES {
 			remoteNonce = decoded[1]
 		}
 
-		// parse packet
 		this._remoteEphemeralPublicKey = remoteEphemeralPublicKey
 		this._remoteNonce = remoteNonce
 
@@ -303,7 +295,6 @@ export class ECIES {
 	}
 
 	parseHeader(data: Uint8Array): number | undefined {
-		// parse header
 		let header = data.subarray(0, 16)
 		const mac = data.subarray(16, 32)
 

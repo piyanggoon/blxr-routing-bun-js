@@ -25,7 +25,7 @@ export class RLPx {
 		this.events = new EventEmitter()
 		this._privateKey = privateKey
 		this.id = pk2id(secp256k1.getPublicKey(this._privateKey, false))
-		this.clientId = utf8ToBytes(`blxr-routing/${platform()}-${arch()}/bun-js`)
+		this.clientId = utf8ToBytes(`blxr-routing/${platform()}-${arch()}/bun.js`)
 		this._capabilities = options.capabilities
 
 		this._listenHost = options.listenHost
@@ -43,8 +43,8 @@ export class RLPx {
 				},
 				data(socket, data) {
 					socket.data.peer.events.emit('socket:data', data)
-				},
-			},
+				}
+			}
 		})
 	}
 
@@ -65,7 +65,7 @@ export class RLPx {
 			remoteId: peerId,
 			privateKey: this._privateKey,
 			capabilities: this._capabilities,
-			timeout: 10000, // 10 sec
+			timeout: 10000 // 10 sec
 		})
 		socket.data = { closed: false, peer }
 
@@ -83,7 +83,7 @@ export class RLPx {
 		peer.events.once('close', (reason, disconnectWe) => {
 			const id = peer.getId()
 			if (id) {
-				this.events.emit('peer:close', peer, reason, disconnectWe)
+				this.events.emit('peer:close', peer, peer.getDisconnectPrefix(reason), disconnectWe)
 			}
 		})
 	}

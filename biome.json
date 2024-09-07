@@ -9,6 +9,7 @@
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "single",
+			"trailingCommas": "none",
 			"semicolons": "asNeeded",
 			"lineWidth": 120
 		}
