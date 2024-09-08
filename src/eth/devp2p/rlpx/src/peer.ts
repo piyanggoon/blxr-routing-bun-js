@@ -115,12 +115,16 @@ export class Peer {
 		return this._remoteName
 	}
 
+	getProtocols(): Protocol[] {
+		return this._protocols.map((obj) => obj.protocol)
+	}
+
 	getDisconnectPrefix(code: DISCONNECT_REASON): string {
 		return DISCONNECT_REASON[code]
 	}
 
 	_isSnappy() {
-		return (this._hello !== null && this._hello.protocolVersion >= 5)
+		return this._hello !== null && this._hello.protocolVersion >= 5
 	}
 
 	_sendAck() {

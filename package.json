@@ -18,7 +18,10 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@ethereumjs/common": "^4.4.0",
+    "@ethereumjs/tx": "^5.4.0",
     "ethereum-cryptography": "^2.2.1",
+    "kzg-wasm": "^0.4.0",
     "snappyjs": "^0.7.0"
   }
 }

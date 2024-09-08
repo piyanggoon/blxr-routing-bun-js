@@ -1,7 +1,7 @@
 import * as snappy from 'snappyjs'
 import { RLP } from '~/eth/rlp'
 import { Protocol } from '../protocol'
-import { bytesToHex, bytesToInt, hexViewer } from '~/eth/utils'
+import { bytesToInt } from '~/eth/utils'
 
 import type { Input } from '~/eth/rlp'
 
@@ -18,9 +18,7 @@ export class ETH extends Protocol {
 	}
 
 	_handleMessage(code: ETH.MESSAGE_CODES, data: Uint8Array) {
-		const payload = RLP.decode(data) as ETH.StatusMsg
-		console.log(`Received ${this.getMsgPrefix(code)} message from ${this._peer['_socket'].remoteAddress}`)
-		console.log(hexViewer(data))
+		const payload = RLP.decode(data)
 		switch (code) {
 			case ETH.MESSAGE_CODES.STATUS:
 				if (this._statusTimeoutId) {
@@ -32,13 +30,6 @@ export class ETH extends Protocol {
 					this.sendMessage(ETH.MESSAGE_CODES.UPGRADE_STATUS, [[1]])
 				}
 				break
-			case ETH.MESSAGE_CODES.NEW_BLOCK_HASHES:
-				const [hash, number] = payload[0] as ETH.StatusMsg
-				console.log(bytesToHex(hash as Uint8Array), bytesToInt(number as Uint8Array))
-				break
-			case ETH.MESSAGE_CODES.NEW_BLOCK:
-				// payload = (3)
-				break
 			case ETH.MESSAGE_CODES.GET_BLOCK_HEADERS:
 				this.sendMessage(ETH.MESSAGE_CODES.BLOCK_HEADERS, [payload[0], []])
 				break
@@ -46,6 +37,7 @@ export class ETH extends Protocol {
 				this.sendMessage(ETH.MESSAGE_CODES.BLOCK_BODIES, [payload[0], []])
 				break
 		}
+		this.events.emit('message', code, payload)
 	}
 
 	sendMessage(code: ETH.MESSAGE_CODES, payload: Input) {

@@ -1,8 +1,11 @@
 import { hexToBytes } from 'ethereum-cryptography/utils'
-import { Peer, RLPx } from './eth/devp2p/rlpx'
+import { RLPx } from './eth/devp2p/rlpx'
 import { ETH } from './eth/devp2p/protocol'
+import { BlxrWS } from './blxr/ws'
 
-// const PRIVATE_KEY = genPrivateKey()
+import type { Peer } from './eth/devp2p/rlpx'
+
+const blxr = new BlxrWS()
 const PRIVATE_KEY = hexToBytes('0xed6df2d4b7e82d105538e4a1279925a16a84e772243e80a561e1b201f2e78220')
 const rlpx = new RLPx(PRIVATE_KEY, {
 	listenHost: '127.0.0.1',
@@ -10,8 +13,12 @@ const rlpx = new RLPx(PRIVATE_KEY, {
 	capabilities: [ETH.eth68]
 })
 
-rlpx.events.on('peer:connect', (peer: Peer) => {
+rlpx.events.on('peer:connect', async (peer: Peer) => {
 	console.log('peer:connect', peer.getName())
+	const eth = peer.getProtocols()[0] as ETH
+	blxr.events.on('block', (block) => {
+		eth.sendMessage(ETH.MESSAGE_CODES.NEW_BLOCK, block)
+	})
 })
 
 rlpx.events.on('peer:close', (peer: Peer, reason: string) => {
