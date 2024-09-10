@@ -14,6 +14,7 @@ const EIP = {
 	'0x2': TX.FeeMarketEIP1559Transaction,
 	'0x3': TX.BlobEIP4844Transaction
 }
+const TYPES = ['0x0', '0x1', '0x2', '0x3']
 const common = Common.custom({ chainId: 56 }, { hardfork: Hardfork.Cancun, customCrypto: { kzg: await loadKZG() } })
 
 export class BlxrWS {
@@ -42,55 +43,58 @@ export class BlxrWS {
 		)
 	}
 
-	handleMessage(msg: any) {
+	async handleMessage(msg: any) {
 		const json = JSON.parse(msg)
 		if (json.params && json.params.result) {
-			const data = json.params.result as Block
-			const header = [
-				blxrHex(data.header.parentHash),
-				blxrHex(data.header.sha3Uncles),
-				blxrHex(data.header.miner),
-				blxrHex(data.header.stateRoot),
-				blxrHex(data.header.transactionsRoot),
-				blxrHex(data.header.receiptsRoot),
-				blxrHex(data.header.logsBloom),
-				blxrHex(data.header.difficulty),
-				blxrHex(data.header.number),
-				blxrHex(data.header.gasLimit),
-				blxrHex(data.header.gasUsed),
-				blxrHex(data.header.timestamp),
-				blxrHex(data.header.extraData),
-				blxrHex(data.header.mixHash),
-				blxrHex(data.header.nonce),
-				data.header.baseFeePerGas > 0 ? intToBytes(data.header.baseFeePerGas) : new Uint8Array(0),
-				blxrHex(data.header.withdrawalsRoot),
-				blxrHex(data.header.blobGasUsed),
-				blxrHex(data.header.excessBlobGas)
+			const { header, transactions } = json.params.result as Block
+
+			const headers = [
+				blxrHex(header.parentHash),
+				blxrHex(header.sha3Uncles),
+				blxrHex(header.miner),
+				blxrHex(header.stateRoot),
+				blxrHex(header.transactionsRoot),
+				blxrHex(header.receiptsRoot),
+				blxrHex(header.logsBloom),
+				blxrHex(header.difficulty),
+				blxrHex(header.number),
+				blxrHex(header.gasLimit),
+				blxrHex(header.gasUsed),
+				blxrHex(header.timestamp),
+				blxrHex(header.extraData),
+				blxrHex(header.mixHash),
+				blxrHex(header.nonce),
+				header.baseFeePerGas > 0 ? intToBytes(header.baseFeePerGas) : new Uint8Array(0),
+				blxrHex(header.withdrawalsRoot),
+				blxrHex(header.blobGasUsed),
+				blxrHex(header.excessBlobGas)
 			]
 
-			const txs = []
-			for (const val of data.transactions) {
-				if (val.type === '0x0') {
-					txs.push([
-						blxrHex(val.nonce),
-						blxrHex(val.gasPrice),
-						blxrHex(val.gas),
-						blxrHex(val.to),
-						blxrHex(val.value),
-						blxrHex(val.input),
-						blxrHex(val.v),
-						blxrHex(val.r),
-						blxrHex(val.s)
-					])
-				} else {
-					const tx = { ...val, data: val.input, gasLimit: val.gas } as any
-					const eip = EIP[tx.type as keyof typeof EIP]
-					if (eip) {
-						txs.push(eip.fromTxData(tx, { common }).serialize())
-					}
-				}
-			}
-			this.events.emit('block', [[header, txs, [], []], 0, []])
+			const txs = await Promise.all(
+				transactions
+					.filter((v) => TYPES.includes(v.type))
+					.map((v) => {
+						if (v.type === '0x0') {
+							return Promise.resolve([
+								blxrHex(v.nonce),
+								blxrHex(v.gasPrice),
+								blxrHex(v.gas),
+								blxrHex(v.to),
+								blxrHex(v.value),
+								blxrHex(v.input),
+								blxrHex(v.v),
+								blxrHex(v.r),
+								blxrHex(v.s)
+							])
+						} else {
+							const tx = { ...v, data: v.input, gasLimit: v.gas } as any
+							const eip = EIP[tx.type as keyof typeof EIP]
+							return Promise.resolve(eip.fromTxData(tx, { common }).serialize())
+						}
+					})
+			)
+
+			this.events.emit('block', [[headers, txs, [], []], 0, []])
 		}
 	}
 }
