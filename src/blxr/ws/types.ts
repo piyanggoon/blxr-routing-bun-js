@@ -21,19 +21,28 @@ interface BlockHeader {
 }
 
 interface Transaction {
-	type: string
+	accessList: {
+		address: string
+		storageKeys: string[]
+	}[]
 	blobVersionedHashes: string[]
+	chainId: string
 	from: string
-	to: string
 	gas: string
 	gasPrice: string
 	hash: string
 	input: string
+	maxFeePerBlobGas: string
+	maxFeePerGas: string
+	maxPriorityFeePerGas: string
 	nonce: string
-	value: string
-	v: string
 	r: string
 	s: string
+	to: string
+	type: string
+	v: string
+	value: string
+	yParity: string
 }
 
 interface Withdrawal {
