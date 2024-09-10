@@ -24,6 +24,7 @@ interface Transaction {
 	type: string
 	blobVersionedHashes: string[]
 	from: string
+	to: string
 	gas: string
 	gasPrice: string
 	hash: string
@@ -33,7 +34,6 @@ interface Transaction {
 	v: string
 	r: string
 	s: string
-	to: string
 }
 
 interface Withdrawal {
