@@ -9,12 +9,12 @@ import * as TX from '@ethereumjs/tx'
 
 import type { Block } from './types'
 
-const common = Common.custom({ chainId: 56 }, { hardfork: Hardfork.Cancun, customCrypto: { kzg: await loadKZG() } })
 const EIP = {
 	'0x1': TX.AccessListEIP2930Transaction,
 	'0x2': TX.FeeMarketEIP1559Transaction,
 	'0x3': TX.BlobEIP4844Transaction
 }
+const common = Common.custom({ chainId: 56 }, { hardfork: Hardfork.Cancun, customCrypto: { kzg: await loadKZG() } })
 
 export class BlxrWS {
 	public events: EventEmitter

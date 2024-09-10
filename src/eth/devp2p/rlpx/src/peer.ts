@@ -377,11 +377,12 @@ export class Peer {
 	}
 
 	_getProtocol(code: number): ProtocolDescriptor | undefined {
-		if (code < BASE_PROTOCOL_LENGTH)
+		if (code < BASE_PROTOCOL_LENGTH) {
 			return {
 				protocol: this as unknown as Protocol,
 				offset: 0
 			}
+		}
 		for (const obj of this._protocols) {
 			if (code >= obj.offset && code < obj.offset + obj.length!) return obj
 		}
