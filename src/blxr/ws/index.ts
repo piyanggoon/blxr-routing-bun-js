@@ -47,6 +47,7 @@ export class BlxrWS {
 		const json = JSON.parse(msg)
 		if (json.params && json.params.result) {
 			const { header, transactions } = json.params.result as Block
+			if (header.blobGasUsed !== '0x0') return
 
 			const headers = [
 				blxrHex(header.parentHash),
